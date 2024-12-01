@@ -1,0 +1,31 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+dist/
+*.tmp
+*.log
+
+# IDE-specific files
+.vscode/
+.idea/
+*.iml
+
+# Testing coverage
+coverage/
+
+# Packed files
+*.tgz

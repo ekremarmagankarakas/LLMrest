@@ -1,0 +1,28 @@
+# Source control files
+.git/
+.gitignore
+
+# Development files
+tests/
+test/
+coverage/
+docs/
+.vscode/
+.idea/
+
+# Configuration files
+*.iml
+*.log
+*.yaml
+
+# Environment variables
+.env
+
+# Files not needed for the package
+tmp/
+dist/
+*.tgz
+
+# README and license are usually included, so don't ignore them
+!README.md
+!LICENSE
