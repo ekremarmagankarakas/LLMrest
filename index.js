@@ -46,7 +46,37 @@ const createAIClient = ({ apiKeys }) => {
     }, {});
   };
 
-  return { createChat };
+  // Function to return results as they are available
+  const streamChatResults = async function* ({ models, messages, maxInput, maxOutput, moderationEnabled }) {
+    // Validate input size
+    validateInputSize(messages, maxInput);
+
+    // Perform moderation check if enabled
+    if (moderationEnabled) {
+      await moderationCheck(apiKeys.openai, messages);
+    }
+
+    // Process each model individually and yield results
+    for (const model of models) {
+      try {
+        let result;
+        if (model.startsWith('gpt')) {
+          result = await openaiChat(apiKeys.openai, { model, messages, maxOutput });
+        } else if (model.startsWith('claude')) {
+          result = await claudeChat(apiKeys.claude, { model, messages, maxOutput });
+        } else if (model.startsWith('gemini')) {
+          result = await geminiChat(apiKeys.gemini, { model, messages, maxOutput });
+        } else {
+          throw new Error(`Unsupported model: ${model}`);
+        }
+        yield { model, result }; // Successful response
+      } catch (error) {
+        yield { model, error: error.message || 'An unknown error occurred' }; // Error details
+      }
+    }
+  };
+
+  return { createChat, streamChatResults };
 };
 
 module.exports = { createAIClient };
