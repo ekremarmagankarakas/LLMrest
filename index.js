@@ -1,6 +1,7 @@
 const { createChat: openaiChat } = require('./lib/services/openaiService');
 const { createChat: claudeChat } = require('./lib/services/claudeService');
 const { createChat: geminiChat } = require('./lib/services/geminiService');
+const { createChat: perplexityChat } = require('./lib/services/perplexityService');
 const { moderationCheck } = require('./lib/middleware/moderationCheck');
 const { validateInputSize } = require('./lib/middleware/validateInputSize');
 
@@ -29,6 +30,9 @@ const createAIClient = ({ apiKeys }) => {
         }
         if (model.startsWith('gemini')) {
           return geminiChat(apiKeys.gemini, { model, messages, maxOutput });
+        }
+        if (model.startsWith('llama')) {
+          return perplexityChat(apiKeys.perplexity, { model, messages, maxOutput });
         }
         return Promise.reject(new Error(`Unsupported model: ${model}`));
       })
@@ -66,6 +70,8 @@ const createAIClient = ({ apiKeys }) => {
           result = await claudeChat(apiKeys.claude, { model, messages, maxOutput });
         } else if (model.startsWith('gemini')) {
           result = await geminiChat(apiKeys.gemini, { model, messages, maxOutput });
+        } else if (model.startsWith('llama')) {
+          result = await perplexityChat(apiKeys.perplexity, { model, messages, maxOutput });
         } else {
           throw new Error(`Unsupported model: ${model}`);
         }
