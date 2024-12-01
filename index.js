@@ -22,13 +22,13 @@ const createAIClient = ({ apiKeys }) => {
     const results = await Promise.allSettled(
       models.map((model) => {
         if (model.startsWith('gpt')) {
-          return openaiChat(apiKeys.openai, { model, messages, maxInput, maxOutput, moderationEnabled });
+          return openaiChat(apiKeys.openai, { model, messages, maxOutput });
         }
         if (model.startsWith('claude')) {
-          return claudeChat(apiKeys.claude, { model, messages, maxInput, maxOutput, moderationEnabled });
+          return claudeChat(apiKeys.claude, { model, messages, maxOutput });
         }
         if (model.startsWith('gemini')) {
-          return geminiChat(apiKeys.gemini, { model, messages, maxInput, maxOutput, moderationEnabled });
+          return geminiChat(apiKeys.gemini, { model, messages, maxOutput });
         }
         return Promise.reject(new Error(`Unsupported model: ${model}`));
       })
