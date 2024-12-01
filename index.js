@@ -1,27 +1,26 @@
-const express = require('express');
-const apiRouter = require('./lib/apiRouter');
 const { createChat: openaiChat } = require('./lib/services/openaiService');
 const { createChat: claudeChat } = require('./lib/services/claudeService');
 const { createChat: geminiChat } = require('./lib/services/geminiService');
+const { moderationCheck } = require('./lib/middleware/moderationCheck');
+const { validateInputSize } = require('./lib/middleware/validateInputSize');
 
-const createServer = ({ apiKeys }) => {
+const createAIClient = ({ apiKeys }) => {
   if (!apiKeys || typeof apiKeys !== 'object') {
-    throw new Error('API keys are required to initialize the server.');
+    throw new Error('API keys are required.');
   }
 
-  const app = express();
-
-  // Middleware
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
-
-  // Attach API Router
-  app.use('/api', apiRouter(apiKeys));
-
-  // Aggregate results from multiple models
   const createChat = async ({ models, messages, maxInput, maxOutput, moderationEnabled }) => {
-    const results = await Promise.all(
-      models.map(async (model) => {
+    // Validate input size
+    validateInputSize(messages, maxInput);
+
+    // Perform moderation check if enabled
+    if (moderationEnabled) {
+      await moderationCheck(apiKeys.openai, messages);
+    }
+
+    // Call the appropriate services for each model
+    const results = await Promise.allSettled(
+      models.map((model) => {
         if (model.startsWith('gpt')) {
           return openaiChat(apiKeys.openai, { model, messages, maxInput, maxOutput, moderationEnabled });
         }
@@ -31,21 +30,23 @@ const createServer = ({ apiKeys }) => {
         if (model.startsWith('gemini')) {
           return geminiChat(apiKeys.gemini, { model, messages, maxInput, maxOutput, moderationEnabled });
         }
-        throw new Error(`Unsupported model: ${model}`);
+        return Promise.reject(new Error(`Unsupported model: ${model}`));
       })
     );
 
-    // Structure results by model
+    // Aggregate results
     return models.reduce((acc, model, index) => {
-      acc[model] = results[index];
+      const result = results[index];
+      if (result.status === 'fulfilled') {
+        acc[model] = result.value; // Successful response
+      } else {
+        acc[model] = { error: result.reason.message || 'An unknown error occurred' }; // Error details
+      }
       return acc;
     }, {});
   };
 
-  return {
-    app,
-    createChat,
-  };
+  return { createChat };
 };
 
-module.exports = createServer;
+module.exports = { createAIClient };
