@@ -1,5 +1,5 @@
 {
-  "name": "llmrest",
+  "name": "@armagank/llmrest",
   "version": "1.0.0",
   "description": "send request to llms",
   "main": "index.js",
