@@ -50,39 +50,58 @@ const createAIClient = ({ apiKeys }) => {
     }, {});
   };
 
-  // Function to return results as they are available
-  const streamChatResults = async function* ({ models, messages, maxInput, maxOutput, moderationEnabled }) {
-    // Validate input size
-    validateInputSize(messages, maxInput);
-
-    // Perform moderation check if enabled
-    if (moderationEnabled) {
-      await moderationCheck(apiKeys.openai, messages);
+  const createChatMessages = async ({ models, messages, maxInput, maxOutput, moderationEnabled }) => {
+    if (!messages || typeof messages !== 'object') {
+      throw new Error('Messages must be an object with model-specific messages.');
     }
 
-    // Process each model individually and yield results
-    for (const model of models) {
-      try {
-        let result;
-        if (model.startsWith('gpt')) {
-          result = await openaiChat(apiKeys.openai, { model, messages, maxOutput });
-        } else if (model.startsWith('claude')) {
-          result = await claudeChat(apiKeys.claude, { model, messages, maxOutput });
-        } else if (model.startsWith('gemini')) {
-          result = await geminiChat(apiKeys.gemini, { model, messages, maxOutput });
-        } else if (model.startsWith('llama')) {
-          result = await perplexityChat(apiKeys.perplexity, { model, messages, maxOutput });
-        } else {
-          throw new Error(`Unsupported model: ${model}`);
+    // Validate and perform moderation for each model's messages
+    await Promise.all(
+      models.map(async (model) => {
+        if (!messages[model]) {
+          throw new Error(`No messages provided for model: ${model}`);
         }
-        yield { model, result }; // Successful response
-      } catch (error) {
-        yield { model, error: error.message || 'An unknown error occurred' }; // Error details
+
+        validateInputSize(messages[model], maxInput);
+
+        if (moderationEnabled) {
+          await moderationCheck(apiKeys.openai, messages[model]);
+        }
+      })
+    );
+
+    // Call the appropriate services for each model
+    const results = await Promise.allSettled(
+      models.map((model) => {
+        if (model.startsWith('gpt')) {
+          return openaiChat(apiKeys.openai, { model, messages: messages[model], maxOutput });
+        }
+        if (model.startsWith('claude')) {
+          return claudeChat(apiKeys.claude, { model, messages: messages[model], maxOutput });
+        }
+        if (model.startsWith('gemini')) {
+          return geminiChat(apiKeys.gemini, { model, messages: messages[model], maxOutput });
+        }
+        if (model.startsWith('llama')) {
+          return perplexityChat(apiKeys.perplexity, { model, messages: messages[model], maxOutput });
+        }
+        return Promise.reject(new Error(`Unsupported model: ${model}`));
+      })
+    );
+
+    // Aggregate results
+    return models.reduce((acc, model, index) => {
+      const result = results[index];
+      if (result.status === 'fulfilled') {
+        acc[model] = result.value; // Successful response
+      } else {
+        acc[model] = { error: result.reason.message || 'An unknown error occurred' }; // Error details
       }
-    }
+      return acc;
+    }, {});
   };
 
-  return { createChat, streamChatResults };
+  return { createChat, createChatMessages };
 };
 
 module.exports = { createAIClient };
