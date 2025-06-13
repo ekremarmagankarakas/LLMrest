@@ -1,6 +1,6 @@
 {
   "name": "@armagank/llmrest",
-  "version": "3.0.1",
+  "version": "4.0.1",
   "description": "send request to llms",
   "main": "index.js",
   "scripts": {
