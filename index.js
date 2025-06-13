@@ -106,7 +106,105 @@ const createAIClient = ({ apiKeys }) => {
     }, {});
   };
 
-  return { createChat, createChatMessages };
+  const createChatStreaming = async ({ models, messages, maxInput, maxOutput, moderationEnabled, onResponse }) => {
+    if (!onResponse || typeof onResponse !== 'function') {
+      throw new Error('onResponse callback function is required for streaming.')
+    }
+
+    if (typeof messages === 'object' && !Array.isArray(messages)) {
+      // Handle model-specific messages
+      await Promise.all(
+        models.map(async (model) => {
+          if (!messages[model]) {
+            throw new Error(`No messages provided for model: ${model}`)
+          }
+
+          validateInputSize(messages[model], maxInput)
+
+          if (moderationEnabled) {
+            await moderationCheck(apiKeys.openai, messages[model])
+          }
+        })
+      )
+
+      // Start all model requests concurrently and stream responses as they arrive
+      models.forEach(async (model) => {
+        try {
+          let result
+          if (openaiModels.includes(model)) {
+            result = await openaiChat(apiKeys.openai, { model, messages: messages[model], maxOutput })
+          } else if (claudeModels.includes(model)) {
+            result = await claudeChat(apiKeys.claude, { model, messages: messages[model], maxOutput })
+          } else if (geminiModels.includes(model)) {
+            result = await geminiChat(apiKeys.gemini, { model, messages: messages[model], maxOutput })
+          } else if (perplexityModels.includes(model)) {
+            result = await perplexityChat(apiKeys.perplexity, { model, messages: messages[model], maxOutput })
+          } else {
+            throw new Error(`Unsupported model: ${model}`)
+          }
+
+          // Stream successful response
+          onResponse({
+            model,
+            status: 'success',
+            data: result,
+            timestamp: new Date().toISOString()
+          })
+        } catch (error) {
+          // Stream error response
+          onResponse({
+            model,
+            status: 'error',
+            error: error.message || 'An unknown error occurred',
+            timestamp: new Date().toISOString()
+          })
+        }
+      })
+    } else {
+      // Handle same messages for all models
+      validateInputSize(messages, maxInput)
+
+      if (moderationEnabled) {
+        await moderationCheck(apiKeys.openai, messages)
+      }
+
+      // Start all model requests concurrently and stream responses as they arrive
+      models.forEach(async (model) => {
+        try {
+          let result
+          if (openaiModels.includes(model)) {
+            result = await openaiChat(apiKeys.openai, { model, messages, maxOutput })
+          } else if (claudeModels.includes(model)) {
+            result = await claudeChat(apiKeys.claude, { model, messages, maxOutput })
+          } else if (geminiModels.includes(model)) {
+            result = await geminiChat(apiKeys.gemini, { model, messages, maxOutput })
+          } else if (perplexityModels.includes(model)) {
+            result = await perplexityChat(apiKeys.perplexity, { model, messages, maxOutput })
+          } else {
+            throw new Error(`Unsupported model: ${model}`)
+          }
+
+          // Stream successful response
+          onResponse({
+            model,
+            status: 'success',
+            data: result,
+            timestamp: new Date().toISOString()
+          })
+        } catch (error) {
+          // Stream error response
+          onResponse({
+            model,
+            status: 'error',
+            error: error.message || 'An unknown error occurred',
+            timestamp: new Date().toISOString()
+          })
+        }
+      })
+    }
+  }
+
+  return { createChat, createChatMessages, createChatStreaming };
 };
 
 module.exports = { createAIClient };
