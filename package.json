@@ -4,7 +4,7 @@
   "description": "send request to llms",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/ekremarmagankarakas/LLMrest/issues"
   },
-  "homepage": "https://github.com/ekremarmagankarakas/LLMrest#readme"
+  "homepage": "https://github.com/ekremarmagankarakas/LLMrest#readme",
+  "devDependencies": {
+    "jest": "^30.0.0"
+  }
 }
