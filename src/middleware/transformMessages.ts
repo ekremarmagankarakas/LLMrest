@@ -9,7 +9,7 @@ export const transformMessages = (messages: Message[], target: TransformTarget):
     if (message.role === 'system') {
       result.push(
         { role: 'user', content: message.content },
-        { role: target === 'gemini' ? 'assistant' : 'assistant', content: 'Okay' },
+        { role: 'assistant', content: 'Okay' },
       );
     } else {
       result.push(message);

@@ -27,10 +27,13 @@
   ],
   "author": "Ekrem Karakas",
   "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.20.8",
-    "@google/generative-ai": "^0.17.1",
-    "openai": "^4.73.1"
+    "@anthropic-ai/sdk": "^0.96.0",
+    "@google/generative-ai": "^0.24.1",
+    "openai": "^6.37.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

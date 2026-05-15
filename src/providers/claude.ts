@@ -1,5 +1,4 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 import { BaseProvider } from './base';
 import { transformMessages } from '../middleware/transformMessages';
 import type { ProviderChatOptions } from '../types';
@@ -13,7 +12,7 @@ export class ClaudeProvider extends BaseProvider {
   }
 
   async chat({ model, messages, maxOutput }: ProviderChatOptions): Promise<string> {
-    const transformed = transformMessages(messages, 'anthropic') as MessageParam[];
+    const transformed = transformMessages(messages, 'anthropic') as Anthropic.MessageParam[];
 
     try {
       const response = await this.client.messages.create({
