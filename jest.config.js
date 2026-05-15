@@ -1,14 +1,14 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
+  preset: 'ts-jest',
   testEnvironment: 'node',
   collectCoverage: true,
   collectCoverageFrom: [
-    'lib/**/*.js',
-    'index.js',
-    '!**/node_modules/**'
+    'src/**/*.ts',
+    '!src/types/**',
+    '!src/constants/**',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-  testMatch: [
-    '**/tests/**/*.test.js'
-  ]
-}
+  testMatch: ['**/tests/**/*.test.ts'],
+};

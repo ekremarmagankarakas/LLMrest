@@ -1,6 +1,7 @@
-const OpenAI = require("openai");
+import OpenAI from 'openai';
+import type { Message } from '../types';
 
-const moderationCheck = async (openaiApiKey, messages) => {
+export const moderationCheck = async (openaiApiKey: string, messages: Message[]): Promise<void> => {
   const openai = new OpenAI({ apiKey: openaiApiKey });
 
   const moderation = await openai.moderations.create({
@@ -9,11 +10,6 @@ const moderationCheck = async (openaiApiKey, messages) => {
 
   const flagged = moderation.results.some((result) => result.flagged);
   if (flagged) {
-    throw new Error(
-      "Input contains restricted or potentially harmful content.",
-    );
+    throw new Error('Input contains restricted or potentially harmful content.');
   }
 };
-
-module.exports = { moderationCheck };
-

@@ -1,28 +1,20 @@
-# Source control files
+# Source
+src/
+tests/
+
+# Config
+tsconfig.json
+jest.config.js
+.eslintrc*
+
+# Dev artifacts
+coverage/
 .git/
 .gitignore
+.npmignore
 
-# Development files
-tests/
-test/
-coverage/
-docs/
-.vscode/
-.idea/
-
-# Configuration files
-*.iml
+# Misc
 *.log
-*.yaml
-
-# Environment variables
 .env
-
-# Files not needed for the package
-tmp/
-dist/
-*.tgz
-
-# README and license are usually included, so don't ignore them
-!README.md
-!LICENSE
+.DS_Store
+node_modules/

@@ -1,17 +1,29 @@
 {
   "name": "@armagank/llmrest",
-  "version": "4.0.1",
-  "description": "send request to llms",
-  "main": "index.js",
+  "version": "5.0.0",
+  "description": "Send requests to multiple LLMs concurrently",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "scripts": {
-    "test": "jest"
+    "build": "tsc",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ekremarmagankarakas/LLMrest.git"
   },
   "keywords": [
-    "llmrest"
+    "llmrest",
+    "llm",
+    "openai",
+    "claude",
+    "gemini",
+    "perplexity"
   ],
   "author": "Ekrem Karakas",
   "license": "ISC",
@@ -20,11 +32,15 @@
     "@google/generative-ai": "^0.17.1",
     "openai": "^4.73.1"
   },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.4.0"
+  },
   "bugs": {
     "url": "https://github.com/ekremarmagankarakas/LLMrest/issues"
   },
-  "homepage": "https://github.com/ekremarmagankarakas/LLMrest#readme",
-  "devDependencies": {
-    "jest": "^30.0.0"
-  }
+  "homepage": "https://github.com/ekremarmagankarakas/LLMrest#readme"
 }
